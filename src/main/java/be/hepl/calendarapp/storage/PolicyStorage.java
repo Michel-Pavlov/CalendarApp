@@ -20,7 +20,10 @@ public class PolicyStorage {
 
     public Policy loadOrDefault(Policy fallback){
         try {
-            if (!Files.exists(file)) return fallback;
+            if (!Files.exists(file)){
+                save(fallback);
+                return fallback;
+            }
             String json = Files.readString(file, StandardCharsets.UTF_8);
             return fromJson(json, fallback);
         } catch (Exception e){

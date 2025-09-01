@@ -26,7 +26,7 @@ public class CalendarPresenter {
         model.addListener(view);
 
         Policy loaded = policyStorage.loadOrDefault(CalendarModel.defaultPolicy());
-        commands.execute(new SetPolicyCommand(repo, loaded)); // via commande pour rester cohérent
+        commands.execute(new SetPolicyCommand(repo, loaded));
         view.refreshAll(model);
 
         // Ouvrir le dialog "Nouvel événement"
@@ -61,25 +61,22 @@ public class CalendarPresenter {
         view.setOnUndo(() -> { commands.undo(); view.refreshAll(model); });
         view.setOnRedo(() -> { commands.redo(); view.refreshAll(model); });
 
-        // Policy : presets + “Personnalisée…”
         view.setOnPolicyChange(choice -> {
             switch (choice) {
                 case "Aucune" -> {
                     commands.execute(new SetPolicyCommand(repo, CalendarModel.nonePolicy()));
-                    policyStorage.save(model.policy());
                     view.refreshAll(model);
                 }
                 case "Heures > 8" -> {
                     commands.execute(new SetPolicyCommand(repo, CalendarModel.defaultPolicy()));
-                    policyStorage.save(model.policy());
                     view.refreshAll(model);
                 }
-                default -> { // "Personnalisée…"
-                    PolicyEditorDialog dlg = new PolicyEditorDialog(model.policy());
+                default -> { // Personnalisée
+                    PolicyEditorDialog dlg = new PolicyEditorDialog(loaded);
                     var res = dlg.showAndWait();
                     if (res.isPresent() && res.get() != null) {
                         commands.execute(new SetPolicyCommand(repo, res.get()));
-                        policyStorage.save(model.policy());
+                        policyStorage.save(loaded);
                         view.refreshAll(model);
                     }
                 }
